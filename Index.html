@@ -1,0 +1,1622 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>Happy Birthday, My Love 💓</title>
+<style>
+  /* ============================================================
+     DESIGN TOKENS
+     ============================================================ */
+  :root {
+    --ivory:        #FBF7F2;
+    --ivory-deep:   #F4EDE5;
+    --rose:         #D8A7B1;
+    --rose-deep:    #C98B9B;
+    --blush:        #EBD3D8;
+    --plum:         #5A2A3A;
+    --plum-soft:    #7A4553;
+    --gold:         #C9A227;
+    --gold-soft:    #E3C97A;
+
+    --hairline:     rgba(90, 42, 58, 0.16);
+    --hairline-lt:  rgba(90, 42, 58, 0.09);
+
+    --shadow-soft:  0 10px 30px rgba(90, 42, 58, 0.08);
+    --shadow-lift:  0 18px 44px rgba(90, 42, 58, 0.14);
+
+    --serif:        Georgia, "Times New Roman", Times, serif;
+    --script:       "Brush Script MT", "Segoe Script", "Snell Roundhand", cursive;
+
+    --ease-glide:   cubic-bezier(0.22, 1, 0.36, 1);
+    --slide-ms:     900ms;
+
+    --unit: 8px;
+  }
+
+  /* ============================================================
+     RESET / BASE
+     ============================================================ */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    height: 100%;
+    overflow: hidden;
+  }
+
+  body {
+    background: var(--ivory);
+    color: var(--plum);
+    font-family: var(--serif);
+    font-size: 16px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    position: relative;
+  }
+
+  /* Soft vignette + warm wash over the whole page */
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 9990;
+    background:
+      radial-gradient(120% 90% at 50% 0%, rgba(216, 167, 177, 0.16) 0%, rgba(251, 247, 242, 0) 60%),
+      radial-gradient(120% 100% at 50% 110%, rgba(201, 162, 39, 0.08) 0%, rgba(251, 247, 242, 0) 55%),
+      radial-gradient(140% 120% at 50% 50%, rgba(251, 247, 242, 0) 55%, rgba(90, 42, 58, 0.10) 100%);
+  }
+
+  /* Fine grain / noise overlay via SVG-free tiling gradient */
+  body::after {
+    content: "";
+    position: fixed;
+    inset: -50%;
+    pointer-events: none;
+    z-index: 9991;
+    opacity: 0.35;
+    background-image:
+      repeating-linear-gradient(0deg, rgba(90,42,58,0.018) 0px, rgba(90,42,58,0.018) 1px, transparent 1px, transparent 3px),
+      repeating-linear-gradient(90deg, rgba(90,42,58,0.014) 0px, rgba(90,42,58,0.014) 1px, transparent 1px, transparent 3px);
+    animation: grainShift 9s steps(6) infinite;
+  }
+  @keyframes grainShift {
+    0%   { transform: translate(0, 0); }
+    20%  { transform: translate(-2%, 1%); }
+    40%  { transform: translate(1%, -2%); }
+    60%  { transform: translate(-1%, 2%); }
+    80%  { transform: translate(2%, 1%); }
+    100% { transform: translate(0, 0); }
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--rose-deep);
+    outline-offset: 4px;
+    border-radius: 6px;
+  }
+
+  button {
+    font-family: inherit;
+    cursor: pointer;
+    border: none;
+    background: none;
+    color: inherit;
+  }
+
+  /* ============================================================
+     AMBIENT LAYER — floating hearts + gold sparkles
+     ============================================================ */
+  .ambient-layer {
+    position: fixed;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+    z-index: 2;
+  }
+
+  .ambient-heart {
+    position: absolute;
+    bottom: -8vh;
+    font-size: 16px;
+    color: var(--rose-deep);
+    opacity: 0;
+    will-change: transform, opacity;
+    animation: floatUp linear infinite;
+  }
+  .ambient-heart.gold { color: var(--gold-soft); }
+
+  @keyframes floatUp {
+    0%   { transform: translate3d(0, 0, 0) rotate(0deg) scale(0.7); opacity: 0; }
+    12%  { opacity: 0.55; }
+    60%  { opacity: 0.42; }
+    100% { transform: translate3d(var(--drift, 20px), -118vh, 0) rotate(var(--spin, 40deg)) scale(1.05); opacity: 0; }
+  }
+
+  .sparkle {
+    position: absolute;
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    background: radial-gradient(circle, var(--gold-soft) 0%, rgba(201,162,39,0) 70%);
+    opacity: 0;
+    animation: twinkle ease-in-out infinite;
+  }
+  @keyframes twinkle {
+    0%, 100% { opacity: 0; transform: scale(0.4); }
+    50%      { opacity: 0.85; transform: scale(1.1); }
+  }
+
+  /* ============================================================
+     PARTICLES CANVAS (bursts / confetti)
+     ============================================================ */
+  #particleCanvas {
+    position: fixed;
+    inset: 0;
+    z-index: 9995;
+    pointer-events: none;
+  }
+
+  /* ============================================================
+     SLIDESHOW SHELL
+     ============================================================ */
+  .slideshow {
+    position: relative;
+    height: 100vh;
+    height: 100dvh;
+    width: 100%;
+    z-index: 1;
+  }
+
+  .slide {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: calc(var(--unit) * 8) calc(var(--unit) * 3);
+    padding-bottom: calc(var(--unit) * 12);
+    text-align: center;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(6%) scale(0.985);
+    transition:
+      opacity var(--slide-ms) var(--ease-glide),
+      transform var(--slide-ms) var(--ease-glide),
+      visibility 0s linear var(--slide-ms);
+    cursor: pointer;
+  }
+
+  .slide.active {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0) scale(1);
+    transition-delay: 0s;
+  }
+
+  /* Content wrapper keeps text from stretching too wide */
+  .slide-inner {
+    width: 100%;
+    max-width: 720px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: calc(var(--unit) * 3);
+  }
+
+  /* Interactive controls inside slides should opt out of the "advance" tap */
+  .no-advance { cursor: default; }
+
+  /* ============================================================
+     TYPOGRAPHY HELPERS
+     ============================================================ */
+  .eyebrow {
+    font-variant: small-caps;
+    letter-spacing: 0.34em;
+    font-size: 0.72rem;
+    color: var(--plum-soft);
+    opacity: 0.9;
+  }
+
+  .heading-xl {
+    font-size: clamp(2.4rem, 9vw, 4.6rem);
+    font-weight: 700;
+    line-height: 1.04;
+    letter-spacing: -0.015em;
+    color: var(--plum);
+  }
+
+  .heading-lg {
+    font-size: clamp(1.7rem, 6vw, 2.9rem);
+    font-weight: 700;
+    line-height: 1.15;
+    letter-spacing: -0.01em;
+  }
+
+  .heading-md {
+    font-size: clamp(1.3rem, 4.4vw, 1.9rem);
+    font-weight: 700;
+    line-height: 1.25;
+  }
+
+  .script-line {
+    font-family: var(--script);
+    font-size: clamp(1.35rem, 5.2vw, 2.3rem);
+    color: var(--rose-deep);
+    line-height: 1.35;
+  }
+
+  .body-text {
+    font-size: clamp(1rem, 3.6vw, 1.18rem);
+    line-height: 1.75;
+    color: var(--plum-soft);
+    max-width: 46ch;
+  }
+
+  .hairline {
+    width: min(240px, 60%);
+    height: 1px;
+    border: 0;
+    background: linear-gradient(90deg, transparent, var(--hairline), transparent);
+  }
+
+  .gold-rule {
+    width: 48px; height: 1px;
+    background: var(--gold);
+    opacity: 0.55;
+  }
+
+  .heart-glyph { color: var(--rose-deep); }
+
+  /* ============================================================
+     SLIDE 1 — COVER
+     ============================================================ */
+  .cover-badge {
+    width: 68px; height: 68px;
+    border-radius: 50%;
+    border: 1px solid var(--hairline);
+    display: grid;
+    place-items: center;
+    font-size: 26px;
+    background: rgba(255,255,255,0.55);
+    box-shadow: var(--shadow-soft);
+    animation: pulseHeart 3.4s ease-in-out infinite;
+  }
+  @keyframes pulseHeart {
+    0%, 100% { transform: scale(1); box-shadow: var(--shadow-soft); }
+    50%      { transform: scale(1.06); box-shadow: var(--shadow-lift); }
+  }
+
+  .tap-hint {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.72rem;
+    font-variant: small-caps;
+    letter-spacing: 0.22em;
+    color: var(--plum-soft);
+    opacity: 0;
+    transition: opacity 700ms ease;
+    margin-top: var(--unit);
+  }
+  .tap-hint.visible { opacity: 0.85; }
+  .tap-hint .arrow {
+    display: inline-block;
+    animation: bobDown 1.8s ease-in-out infinite;
+  }
+  @keyframes bobDown {
+    0%, 100% { transform: translateY(0); }
+    50%      { transform: translateY(4px); }
+  }
+
+  /* ============================================================
+     SLIDE 2 — DEDICATION / DATE
+     ============================================================ */
+  .date-display {
+    display: flex;
+    align-items: baseline;
+    justify-content: center;
+    gap: 0.35em;
+    flex-wrap: wrap;
+  }
+  .date-month {
+    font-variant: small-caps;
+    letter-spacing: 0.28em;
+    font-size: clamp(0.9rem, 3.4vw, 1.05rem);
+    color: var(--plum-soft);
+    opacity: 0;
+    animation: fadeRise 900ms var(--ease-glide) 200ms forwards;
+  }
+  .date-day {
+    font-size: clamp(3.4rem, 17vw, 6.6rem);
+    font-weight: 700;
+    line-height: 0.95;
+    letter-spacing: -0.03em;
+    color: var(--plum);
+    opacity: 0;
+    animation: fadeRise 1000ms var(--ease-glide) 420ms forwards;
+  }
+  .date-day .num {
+    background: linear-gradient(180deg, var(--plum) 0%, var(--plum-soft) 55%, var(--gold) 140%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .date-year {
+    font-variant: small-caps;
+    letter-spacing: 0.28em;
+    font-size: clamp(0.9rem, 3.4vw, 1.05rem);
+    color: var(--plum-soft);
+    opacity: 0;
+    animation: fadeRise 900ms var(--ease-glide) 640ms forwards;
+  }
+
+  @keyframes fadeRise {
+    from { opacity: 0; transform: translateY(14px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ============================================================
+     SLIDE 3 — COUNTDOWN
+     ============================================================ */
+  .countdown-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: calc(var(--unit) * 1.5);
+    width: 100%;
+    max-width: 620px;
+  }
+
+  .glass-card {
+    background: rgba(255, 255, 255, 0.62);
+    border: 1px solid var(--hairline-lt);
+    border-radius: 16px;
+    padding: calc(var(--unit) * 2.5) calc(var(--unit) * 1);
+    box-shadow: var(--shadow-soft);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .countdown-value {
+    font-size: clamp(1.5rem, 6.4vw, 2.4rem);
+    font-weight: 700;
+    line-height: 1;
+    color: var(--plum);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.02em;
+  }
+
+  .countdown-label {
+    font-variant: small-caps;
+    letter-spacing: 0.2em;
+    font-size: 0.62rem;
+    color: var(--plum-soft);
+    opacity: 0.85;
+  }
+
+  .countdown-caption {
+    font-family: var(--script);
+    font-size: clamp(1.05rem, 4vw, 1.5rem);
+    color: var(--rose-deep);
+    min-height: 1.4em;
+  }
+
+  /* ============================================================
+     SLIDE 4 — ENVELOPE
+     ============================================================ */
+  .envelope-stage {
+    perspective: 1200px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: calc(var(--unit) * 2.5);
+    width: 100%;
+  }
+
+  .envelope {
+    position: relative;
+    width: min(320px, 78vw);
+    aspect-ratio: 3 / 2;
+    cursor: pointer;
+    transition: transform 500ms var(--ease-glide);
+  }
+  .envelope:hover { transform: translateY(-4px); }
+
+  .envelope-body {
+    position: absolute;
+    inset: 0;
+    border-radius: 10px;
+    background: linear-gradient(160deg, #FFFFFF 0%, var(--ivory-deep) 100%);
+    border: 1px solid var(--hairline);
+    box-shadow: var(--shadow-lift);
+    overflow: hidden;
+  }
+  /* subtle inner fold lines */
+  .envelope-body::before,
+  .envelope-body::after {
+    content: "";
+    position: absolute;
+    top: 0; bottom: 0;
+    width: 1px;
+    background: var(--hairline-lt);
+  }
+  .envelope-body::before { left: 0;      transform: skewX(0); }
+  .envelope-body::after  { right: 0; }
+
+  .envelope-flap {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 58%;
+    background: linear-gradient(170deg, var(--blush) 0%, var(--rose) 100%);
+    clip-path: polygon(0 0, 100% 0, 50% 100%);
+    transform-origin: top center;
+    transition: transform 850ms var(--ease-glide);
+    z-index: 4;
+    border-radius: 10px 10px 0 0;
+  }
+  .envelope.open .envelope-flap {
+    transform: rotateX(-172deg);
+  }
+
+  .envelope-seal {
+    position: absolute;
+    left: 50%; top: 46%;
+    transform: translate(-50%, -50%);
+    width: 46px; height: 46px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%, var(--rose-deep), var(--plum));
+    color: var(--ivory);
+    display: grid;
+    place-items: center;
+    font-size: 18px;
+    z-index: 6;
+    box-shadow: 0 6px 16px rgba(90,42,58,0.28);
+    transition: transform 600ms var(--ease-glide), opacity 500ms ease;
+  }
+  .envelope.open .envelope-seal {
+    transform: translate(-50%, -50%) scale(0.4);
+    opacity: 0;
+  }
+
+  .envelope-hint {
+    position: absolute;
+    bottom: -34px;
+    left: 50%;
+    transform: translateX(-50%);
+    white-space: nowrap;
+    font-size: 0.68rem;
+    font-variant: small-caps;
+    letter-spacing: 0.22em;
+    color: var(--plum-soft);
+    opacity: 0.8;
+    transition: opacity 400ms ease;
+    z-index: 7;
+  }
+  .envelope.open .envelope-hint { opacity: 0; }
+
+  /* The letter that slides out */
+  .letter-panel {
+    width: min(400px, 88vw);
+    max-height: 0;
+    opacity: 0;
+    overflow: hidden;
+    background: linear-gradient(180deg, #FFFFFF 0%, var(--ivory) 100%);
+    border: 1px solid var(--hairline-lt);
+    border-radius: 14px;
+    box-shadow: var(--shadow-soft);
+    transition:
+      max-height 950ms var(--ease-glide),
+      opacity 700ms ease 160ms,
+      padding 700ms var(--ease-glide),
+      margin 700ms var(--ease-glide);
+    padding: 0 calc(var(--unit) * 3);
+    margin-top: 0;
+    text-align: left;
+  }
+  .letter-panel.revealed {
+    max-height: 520px;
+    opacity: 1;
+    padding: calc(var(--unit) * 3.5) calc(var(--unit) * 3);
+    margin-top: calc(var(--unit) * 2);
+  }
+
+  .letter-salutation {
+    font-family: var(--script);
+    font-size: clamp(1.3rem, 4.6vw, 1.7rem);
+    color: var(--rose-deep);
+    margin-bottom: calc(var(--unit) * 1.5);
+  }
+  .letter-text {
+    font-size: clamp(0.95rem, 3.5vw, 1.08rem);
+    line-height: 1.85;
+    color: var(--plum-soft);
+  }
+  .letter-signature {
+    margin-top: calc(var(--unit) * 2);
+    font-family: var(--script);
+    font-size: clamp(1.1rem, 4vw, 1.4rem);
+    color: var(--plum);
+    text-align: right;
+  }
+
+  /* ============================================================
+     SLIDE 5 — REASONS CAROUSEL
+     ============================================================ */
+  .carousel {
+    width: 100%;
+    max-width: 560px;
+    position: relative;
+  }
+
+  .reason-viewport {
+    position: relative;
+    min-height: 210px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .reason-card {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: calc(var(--unit) * 1.5);
+    opacity: 0;
+    transform: translateY(12px) scale(0.97);
+    transition: opacity 480ms var(--ease-glide), transform 480ms var(--ease-glide);
+    padding: calc(var(--unit) * 2);
+  }
+  .reason-card.is-active {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+
+  .reason-index {
+    font-size: 0.7rem;
+    font-variant: small-caps;
+    letter-spacing: 0.28em;
+    color: var(--gold);
+  }
+  .reason-title {
+    font-family: var(--script);
+    font-size: clamp(1.5rem, 6vw, 2.2rem);
+    color: var(--rose-deep);
+    line-height: 1.2;
+  }
+  .reason-body {
+    font-size: clamp(0.95rem, 3.5vw, 1.08rem);
+    line-height: 1.75;
+    color: var(--plum-soft);
+    max-width: 40ch;
+  }
+
+  .carousel-controls {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: calc(var(--unit) * 2);
+    margin-top: calc(var(--unit) * 2.5);
+  }
+
+  .nav-arrow {
+    width: 42px; height: 42px;
+    border-radius: 50%;
+    border: 1px solid var(--hairline);
+    display: grid;
+    place-items: center;
+    font-size: 1rem;
+    color: var(--plum);
+    background: rgba(255,255,255,0.6);
+    transition: transform 260ms var(--ease-glide), background 260ms ease, box-shadow 260ms ease;
+  }
+  .nav-arrow:hover {
+    background: #FFFFFF;
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-soft);
+  }
+  .nav-arrow:active { transform: translateY(0) scale(0.95); }
+
+  .carousel-dots {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .carousel-dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--hairline);
+    transition: background 300ms ease, transform 300ms ease, box-shadow 300ms ease;
+  }
+  .carousel-dot.is-active {
+    background: var(--rose-deep);
+    transform: scale(1.35);
+    box-shadow: 0 0 0 3px rgba(201, 139, 155, 0.18);
+  }
+
+  /* ============================================================
+     SLIDE 6 — CAKE / CANDLE
+     ============================================================ */
+  .cake-stage {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: calc(var(--unit) * 2);
+  }
+
+  .cake {
+    position: relative;
+    width: min(230px, 62vw);
+    cursor: pointer;
+    transition: transform 400ms var(--ease-glide);
+  }
+  .cake:hover { transform: translateY(-3px); }
+
+  .candle {
+    position: relative;
+    width: 12px;
+    height: 52px;
+    margin: 0 auto -2px;
+    border-radius: 6px;
+    background: repeating-linear-gradient(45deg, #FFFFFF 0 6px, var(--rose) 6px 12px);
+    border: 1px solid rgba(90,42,58,0.14);
+    z-index: 3;
+  }
+
+  .flame {
+    position: absolute;
+    top: -22px;
+    left: 50%;
+    transform: translateX(-50%) scale(0);
+    width: 14px;
+    height: 22px;
+    border-radius: 50% 50% 50% 50% / 62% 62% 38% 38%;
+    background: radial-gradient(circle at 50% 72%, #FFF6D0 0%, var(--gold-soft) 45%, #E08A3C 100%);
+    box-shadow: 0 0 18px 6px rgba(201, 162, 39, 0.4);
+    transform-origin: bottom center;
+    transition: transform 400ms var(--ease-glide), opacity 400ms ease;
+    opacity: 0;
+  }
+  .cake.lit .flame {
+    transform: translateX(-50%) scale(1);
+    opacity: 1;
+    animation: flicker 900ms ease-in-out infinite alternate;
+  }
+  @keyframes flicker {
+    from { transform: translateX(-50%) scale(1) rotate(-3deg); opacity: 0.92; }
+    to   { transform: translateX(-50%) scale(1.09) rotate(3deg); opacity: 1; }
+  }
+
+  .cake-tier {
+    border-radius: 16px;
+    border: 1px solid var(--hairline-lt);
+    box-shadow: var(--shadow-soft);
+  }
+  .cake-tier-top {
+    height: 46px;
+    margin: 0 22px -12px;
+    background: linear-gradient(180deg, #FFFFFF 0%, var(--blush) 100%);
+    z-index: 2;
+    position: relative;
+  }
+  .cake-tier-bottom {
+    height: 74px;
+    background: linear-gradient(180deg, var(--blush) 0%, var(--rose) 100%);
+    position: relative;
+    z-index: 1;
+  }
+  /* icing swirl dots */
+  .cake-tier-top::after {
+    content: "";
+    position: absolute;
+    left: 0; right: 0; top: 8px;
+    height: 8px;
+    background-image: radial-gradient(circle, var(--rose-deep) 2.5px, transparent 3px);
+    background-size: 18px 18px;
+    background-repeat: repeat-x;
+    opacity: 0.5;
+  }
+
+  .cake-hint {
+    font-size: 0.7rem;
+    font-variant: small-caps;
+    letter-spacing: 0.22em;
+    color: var(--plum-soft);
+    opacity: 0.85;
+    min-height: 1.6em;
+    transition: opacity 400ms ease;
+  }
+
+  .wish-reveal {
+    font-family: var(--script);
+    font-size: clamp(1.15rem, 4.4vw, 1.7rem);
+    color: var(--rose-deep);
+    opacity: 0;
+    transform: translateY(10px);
+    transition: opacity 700ms ease, transform 700ms var(--ease-glide);
+    max-width: 30ch;
+  }
+  .wish-reveal.shown { opacity: 1; transform: translateY(0); }
+
+  /* ============================================================
+     SLIDE 7 — FINALE
+     ============================================================ */
+  .cta-button {
+    position: relative;
+    padding: calc(var(--unit) * 2.2) calc(var(--unit) * 5);
+    border-radius: 999px;
+    font-size: clamp(1rem, 3.8vw, 1.18rem);
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    color: var(--ivory);
+    background: linear-gradient(135deg, var(--rose-deep) 0%, var(--plum) 100%);
+    box-shadow: 0 14px 34px rgba(90, 42, 58, 0.24);
+    overflow: hidden;
+    transition: transform 300ms var(--ease-glide), box-shadow 300ms ease;
+  }
+  .cta-button:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 20px 44px rgba(90, 42, 58, 0.3);
+  }
+  .cta-button:active { transform: translateY(-1px) scale(0.98); }
+
+  /* sheen */
+  .cta-button::after {
+    content: "";
+    position: absolute;
+    top: 0; left: -60%;
+    width: 40%; height: 100%;
+    background: linear-gradient(100deg, transparent, rgba(255,255,255,0.42), transparent);
+    transform: skewX(-18deg);
+    animation: sheen 4.2s ease-in-out infinite;
+  }
+  @keyframes sheen {
+    0%, 62% { left: -60%; }
+    86%     { left: 140%; }
+    100%    { left: 140%; }
+  }
+
+  .closing-line {
+    font-family: var(--script);
+    font-size: clamp(1.3rem, 5.2vw, 2.1rem);
+    color: var(--plum);
+    line-height: 1.4;
+    max-width: 26ch;
+    opacity: 0;
+    transform: translateY(14px);
+    transition: opacity 900ms ease, transform 900ms var(--ease-glide);
+  }
+  .closing-line.shown { opacity: 1; transform: translateY(0); }
+
+  /* ============================================================
+     PROGRESS DOTS (right rail)
+     ============================================================ */
+  .progress-rail {
+    position: fixed;
+    right: calc(var(--unit) * 2);
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 9993;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .progress-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    padding: 0;
+    background: var(--hairline);
+    transition: all 420ms var(--ease-glide);
+    position: relative;
+  }
+  .progress-dot.is-active {
+    background: var(--rose-deep);
+    transform: scale(1.45);
+    box-shadow: 0 0 0 4px rgba(201, 139, 155, 0.16), 0 0 14px rgba(201, 139, 155, 0.55);
+  }
+  .progress-dot:hover { background: var(--rose); }
+
+  /* ============================================================
+     MUSIC TOGGLE
+     ============================================================ */
+  .music-toggle {
+    position: fixed;
+    left: calc(var(--unit) * 2);
+    bottom: calc(var(--unit) * 2);
+    z-index: 9994;
+    width: 46px; height: 46px;
+    border-radius: 50%;
+    border: 1px solid var(--hairline);
+    background: rgba(255,255,255,0.7);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    display: grid;
+    place-items: center;
+    font-size: 1.05rem;
+    box-shadow: var(--shadow-soft);
+    transition: transform 260ms var(--ease-glide), background 260ms ease;
+  }
+  .music-toggle:hover { transform: translateY(-2px); background: #FFFFFF; }
+  .music-toggle[aria-pressed="true"] {
+    background: linear-gradient(135deg, var(--rose) 0%, var(--rose-deep) 100%);
+    color: var(--ivory);
+  }
+
+  /* ============================================================
+     RESPONSIVE
+     ============================================================ */
+  @media (max-width: 560px) {
+    .countdown-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: calc(var(--unit) * 1.2);
+    }
+    .progress-rail {
+      right: auto;
+      left: 50%;
+      top: auto;
+      bottom: calc(var(--unit) * 2.5);
+      transform: translateX(-50%);
+      flex-direction: row;
+      gap: 10px;
+    }
+    .music-toggle {
+      left: calc(var(--unit) * 1.5);
+      bottom: calc(var(--unit) * 1.5);
+      width: 42px; height: 42px;
+    }
+    .slide { padding-bottom: calc(var(--unit) * 14); }
+  }
+
+  /* ============================================================
+     REDUCED MOTION
+     ============================================================ */
+  @media (prefers-reduced-motion: reduce) {
+    body::after { animation: none; opacity: 0.2; }
+    .ambient-layer, .sparkle { display: none !important; }
+    .slide {
+      transition: opacity 200ms ease, visibility 0s;
+      transform: none !important;
+    }
+    .slide.active { transform: none !important; }
+    .cover-badge, .cta-button::after, .tap-hint .arrow,
+    .ambient-heart, .flame { animation: none !important; }
+    .envelope-flap { transition: transform 200ms ease; }
+    .letter-panel { transition: max-height 200ms ease, opacity 200ms ease, padding 200ms ease, margin 200ms ease; }
+    .date-month, .date-day, .date-year { animation: none !important; opacity: 1 !important; }
+  }
+</style>
+</head>
+<body>
+
+  <!-- ============================================================
+       AMBIENT BACKGROUND LAYER
+       ============================================================ -->
+  <div class="ambient-layer" id="ambientLayer" aria-hidden="true"></div>
+
+  <!-- Particles for bursts -->
+  <canvas id="particleCanvas" aria-hidden="true"></canvas>
+
+  <!-- ============================================================
+       SLIDESHOW
+       ============================================================ -->
+  <main class="slideshow" id="slideshow" role="region" aria-label="Birthday slideshow for My Love">
+    <!-- SLIDE 1 — COVER -->
+    <section class="slide active" id="slide1" data-slide="0" aria-label="Slide 1 of 7: Cover">
+      <div class="slide-inner">
+        <div class="cover-badge" aria-hidden="true">💓</div>
+        <p class="eyebrow">for my love</p>
+        <h1 class="heading-xl">Happy Birthday</h1>
+        <span class="gold-rule" aria-hidden="true"></span>
+        <p class="script-line">to the one who makes my whole world softer.</p>
+        <div class="tap-hint" data-hint aria-hidden="true">
+          <span>tap anywhere</span><span class="arrow">→</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 2 — DEDICATION -->
+    <section class="slide" id="slide2" data-slide="1" aria-label="Slide 2 of 7: Dedication">
+      <div class="slide-inner">
+        <p class="eyebrow">a day that belongs to you</p>
+        <div class="date-display" aria-label="October 27">
+          <span class="date-month">October</span>
+          <span class="date-day"><span class="num">27</span></span>
+        </div>
+        <hr class="hairline" aria-hidden="true" />
+        <p class="body-text">
+          My Love 💓, on the twenty-seventh of October the world quietly became a
+          kinder place — because it was the day you arrived in it. I will spend
+          every year of my life being grateful for that one, small, perfect date.
+        </p>
+        <div class="tap-hint" data-hint aria-hidden="true">
+          <span>tap to continue</span><span class="arrow">→</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 3 — COUNTDOWN -->
+    <section class="slide" id="slide3" data-slide="2" aria-label="Slide 3 of 7: Countdown">
+      <div class="slide-inner">
+        <p class="eyebrow">counting down to your day</p>
+        <h2 class="heading-md">Until October 27</h2>
+        <div class="countdown-grid no-advance" role="timer" aria-live="polite">
+          <div class="glass-card">
+            <span class="countdown-value" id="cdDays">00</span>
+            <span class="countdown-label">days</span>
+          </div>
+          <div class="glass-card">
+            <span class="countdown-value" id="cdHours">00</span>
+            <span class="countdown-label">hours</span>
+          </div>
+          <div class="glass-card">
+            <span class="countdown-value" id="cdMinutes">00</span>
+            <span class="countdown-label">minutes</span>
+          </div>
+          <div class="glass-card">
+            <span class="countdown-value" id="cdSeconds">00</span>
+            <span class="countdown-label">seconds</span>
+          </div>
+        </div>
+        <p class="countdown-caption" id="countdownCaption">every second brings me closer to celebrating you.</p>
+        <div class="tap-hint" data-hint aria-hidden="true">
+          <span>tap to continue</span><span class="arrow">→</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 4 — ENVELOPE LETTER -->
+    <section class="slide" id="slide4" data-slide="3" aria-label="Slide 4 of 7: Love letter">
+      <div class="slide-inner">
+        <p class="eyebrow">a letter, sealed for you</p>
+        <div class="envelope-stage no-advance">
+          <div class="envelope" id="envelope" role="button" tabindex="0"
+               aria-label="Open the love letter envelope" aria-expanded="false">
+            <div class="envelope-body"></div>
+            <div class="envelope-flap" aria-hidden="true"></div>
+            <div class="envelope-seal" aria-hidden="true">💓</div>
+            <span class="envelope-hint" aria-hidden="true">tap to open</span>
+          </div>
+
+          <div class="letter-panel" id="letterPanel" aria-hidden="true">
+            <p class="letter-salutation" id="letterSalutation">My Love 💓,</p>
+            <p class="letter-text" id="letterContent">
+              You make even the quietest moments feel like somewhere I want to stay
+              forever. You are the calm in a loud world, the warmth I look for at the
+              end of every day, and the gentlest reason my heart has ever had to be
+              this happy. Thank you for being exactly who you are — today, and every
+              day you let me love you.
+            </p>
+            <p class="letter-signature">always yours ♡</p>
+          </div>
+        </div>
+        <div class="tap-hint" data-hint aria-hidden="true">
+          <span>tap to continue</span><span class="arrow">→</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 5 — REASONS CAROUSEL -->
+    <section class="slide" id="slide5" data-slide="4" aria-label="Slide 5 of 7: Reasons I love you">
+      <div class="slide-inner">
+        <p class="eyebrow">seven of the countless reasons</p>
+        <h2 class="heading-md">Reasons I Love You</h2>
+
+        <div class="carousel no-advance" id="reasonsCarousel" aria-roledescription="carousel"
+             aria-label="Reasons I love you">
+          <div class="reason-viewport" id="reasonViewport"></div>
+
+          <div class="carousel-controls">
+            <button class="nav-arrow" id="reasonPrev" aria-label="Previous reason">←</button>
+            <div class="carousel-dots" id="reasonDots" role="tablist" aria-label="Choose a reason"></div>
+            <button class="nav-arrow" id="reasonNext" aria-label="Next reason">→</button>
+          </div>
+        </div>
+
+        <div class="tap-hint" data-hint aria-hidden="true">
+          <span>tap to continue</span><span class="arrow">→</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 6 — CAKE / CANDLE -->
+    <section class="slide" id="slide6" data-slide="5" aria-label="Slide 6 of 7: Make a wish">
+      <div class="slide-inner">
+        <p class="eyebrow">make a wish, my love</p>
+        <h2 class="heading-md">Your Birthday Cake</h2>
+
+        <div class="cake-stage no-advance">
+          <div class="cake" id="cake" role="button" tabindex="0"
+               aria-label="Tap to light the candle" aria-pressed="false">
+            <div class="candle" aria-hidden="true">
+              <span class="flame"></span>
+            </div>
+            <div class="cake-tier cake-tier-top" aria-hidden="true"></div>
+            <div class="cake-tier cake-tier-bottom" aria-hidden="true"></div>
+          </div>
+
+          <p class="cake-hint" id="cakeHint">tap the cake to light your candle</p>
+          <p class="wish-reveal" id="wishReveal">
+            Your wish is safe with me. And so is every future October 27.
+          </p>
+        </div>
+
+        <div class="tap-hint" data-hint aria-hidden="true">
+          <span>tap to continue</span><span class="arrow">→</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- SLIDE 7 — FINALE -->
+    <section class="slide" id="slide7" data-slide="6" aria-label="Slide 7 of 7: Finale">
+      <div class="slide-inner">
+        <p class="eyebrow">one last thing</p>
+        <h2 class="heading-lg">Happy Birthday, My Love 💓</h2>
+        <span class="gold-rule" aria-hidden="true"></span>
+        <button class="cta-button no-advance" id="sendLoveButton">Send me some love 💝</button>
+        <p class="closing-line" id="closingLine">
+          I'd choose you in every life, in every version of forever — quietly,
+          completely, and always.
+        </p>
+        <div class="tap-hint" data-hint aria-hidden="true">
+          <span>tap to start again</span><span class="arrow">↺</span>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ============================================================
+       PROGRESS RAIL
+       ============================================================ -->
+  <nav class="progress-rail" id="progressRail" aria-label="Slideshow progress"></nav>
+
+  <!-- ============================================================
+       MUSIC TOGGLE
+       ============================================================ -->
+  <button class="music-toggle" id="musicToggle" aria-pressed="false"
+          aria-label="Toggle background music">♪</button>
+
+<script>
+/* ==========================================================================
+   MY LOVE — BIRTHDAY SLIDESHOW
+   Self-contained: no external assets. All logic below.
+   ========================================================================== */
+(function () {
+  "use strict";
+
+  /* ----------------------------------------------------------------------
+     1. CONTENT DATA (editable)
+     ---------------------------------------------------------------------- */
+  const REASONS = [
+    {
+      title: "Your kindness",
+      body: "You are gentle in a way that changes rooms — the kind of kind that people remember long after you've left."
+    },
+    {
+      title: "Your laughter",
+      body: "Your laugh is my favourite sound; it makes ordinary afternoons feel like something worth keeping."
+    },
+    {
+      title: "The little things you notice",
+      body: "You notice when I'm quieter than usual, when I'm tired, when I need nothing more than to be held. That attention is a kind of love all on its own."
+    },
+    {
+      title: "Your courage",
+      body: "You keep going, softly and steadily, even on the days that ask too much of you. I am endlessly proud of you."
+    },
+    {
+      title: "How you feel like home",
+      body: "Wherever you are is where I want to be. You are the calm I come back to, every single time."
+    },
+    {
+      title: "Your warmth",
+      body: "You love generously, and it makes me braver, softer, and more myself than I've ever been."
+    },
+    {
+      title: "Simply being loved by you",
+      body: "Of all the beautiful things in my life, being loved by you is the one I'm most grateful for."
+    }
+  ];
+
+  const BIRTHDAY_MONTH = 10;   // October (1 = Jan)
+  const BIRTHDAY_DAY   = 27;
+
+  /* ----------------------------------------------------------------------
+     2. DOM SHORTCUTS
+     ---------------------------------------------------------------------- */
+  const slideshow   = document.getElementById("slideshow");
+  const slides      = Array.from(document.querySelectorAll(".slide"));
+  const progressRail= document.getElementById("progressRail");
+  const ambient     = document.getElementById("ambientLayer");
+  const canvas      = document.getElementById("particleCanvas");
+  const ctx         = canvas.getContext("2d");
+
+  const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  let currentIndex = 0;
+
+  /* ----------------------------------------------------------------------
+     3. PROGRESS RAIL BUILD
+     ---------------------------------------------------------------------- */
+  slides.forEach(function (_slide, index) {
+    const dot = document.createElement("button");
+    dot.className = "progress-dot" + (index === 0 ? " is-active" : "");
+    dot.type = "button";
+    dot.setAttribute("aria-label", "Go to slide " + (index + 1));
+    dot.addEventListener("click", function (event) {
+      event.stopPropagation();
+      goToSlide(index);
+    });
+    progressRail.appendChild(dot);
+  });
+
+  const progressDots = Array.from(progressRail.children);
+
+  function syncProgressRail() {
+    progressDots.forEach(function (dot, index) {
+      dot.classList.toggle("is-active", index === currentIndex);
+      dot.setAttribute("aria-current", index === currentIndex ? "true" : "false");
+    });
+  }
+
+  /* ----------------------------------------------------------------------
+     4. SLIDE NAVIGATION
+     ---------------------------------------------------------------------- */
+  function goToSlide(index) {
+    const total = slides.length;
+    // wrap around both directions
+    currentIndex = ((index % total) + total) % total;
+
+    slides.forEach(function (slide, i) {
+      slide.classList.toggle("active", i === currentIndex);
+      // reset per-slide hint visibility when leaving a slide
+      if (i !== currentIndex) {
+        const hint = slide.querySelector("[data-hint]");
+        if (hint) hint.classList.remove("visible");
+      }
+    });
+
+    syncProgressRail();
+    showHintForCurrentSlide();
+  }
+
+  function nextSlide() { goToSlide(currentIndex + 1); }
+  function prevSlide() { goToSlide(currentIndex - 1); }
+
+  /* Tapping anywhere on a slide advances (unless it's an interactive control) */
+  slides.forEach(function (slide) {
+    slide.addEventListener("click", function (event) {
+      if (event.target.closest(".no-advance")) return; // let controls work
+      nextSlide();
+    });
+  });
+
+  /* Keyboard support */
+  document.addEventListener("keydown", function (event) {
+    const key = event.key;
+    if (key === "ArrowDown" || key === " " || key === "Spacebar" || key === "Enter") {
+      // don't hijack Enter/Space on actionable controls
+      if (event.target && event.target.matches("button, [role='button']")) return;
+      event.preventDefault();
+      nextSlide();
+    } else if (key === "ArrowUp") {
+      event.preventDefault();
+      prevSlide();
+    } else if (key === "ArrowRight") {
+      event.preventDefault();
+      nextSlide();
+    } else if (key === "ArrowLeft") {
+      event.preventDefault();
+      prevSlide();
+    }
+  });
+
+  /* Touch swipe support */
+  (function enableSwipe() {
+    let startX = 0, startY = 0, tracking = false;
+    slideshow.addEventListener("touchstart", function (event) {
+      const touch = event.changedTouches[0];
+      startX = touch.clientX;
+      startY = touch.clientY;
+      tracking = true;
+    }, { passive: true });
+
+    slideshow.addEventListener("touchend", function (event) {
+      if (!tracking) return;
+      tracking = false;
+      const touch = event.changedTouches[0];
+      const dx = touch.clientX - startX;
+      const dy = touch.clientY - startY;
+      // Horizontal swipe changes slides; large vertical swipe also advances
+      if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy)) {
+        if (dx < 0) nextSlide(); else prevSlide();
+      } else if (dy < -70) {
+        nextSlide();
+      } else if (dy > 70) {
+        prevSlide();
+      }
+    }, { passive: true });
+  })();
+
+  /* ----------------------------------------------------------------------
+     5. TAP-TO-CONTINUE HINT (fades in, then out, per slide)
+     ---------------------------------------------------------------------- */
+  let hintTimer = null;
+  function showHintForCurrentSlide() {
+    const activeSlide = slides[currentIndex];
+    if (!activeSlide) return;
+    const hint = activeSlide.querySelector("[data-hint]");
+    if (!hint) return;
+
+    if (hintTimer) clearTimeout(hintTimer);
+    hint.classList.remove("visible");
+    // allow reflow before re-adding for a fresh fade-in
+    requestAnimationFrame(function () {
+      requestAnimationFrame(function () {
+        hint.classList.add("visible");
+        hintTimer = setTimeout(function () {
+          hint.classList.remove("visible");
+        }, 3200);
+      });
+    });
+  }
+
+  /* ----------------------------------------------------------------------
+     6. COUNTDOWN (live)
+     ---------------------------------------------------------------------- */
+  const cdDays    = document.getElementById("cdDays");
+  const cdHours   = document.getElementById("cdHours");
+  const cdMinutes = document.getElementById("cdMinutes");
+  const cdSeconds = document.getElementById("cdSeconds");
+  const cdCaption = document.getElementById("countdownCaption");
+
+  function pad(value) { return String(value).padStart(2, "0"); }
+
+  function computeNextBirthday() {
+    const now = new Date();
+    const year = now.getFullYear();
+    let target = new Date(year, BIRTHDAY_MONTH - 1, BIRTHDAY_DAY, 0, 0, 0, 0);
+
+    // If today is the birthday (same month & day), keep today's date so the
+    // countdown reads as "today is the day".
+    const isToday =
+      now.getMonth() === BIRTHDAY_MONTH - 1 && now.getDate() === BIRTHDAY_DAY;
+
+    if (isToday) return { target: new Date(year, BIRTHDAY_MONTH - 1, BIRTHDAY_DAY), isToday: true };
+
+    // Otherwise, if we've already passed this year's birthday, use next year.
+    if (now.getTime() > target.getTime()) {
+      target = new Date(year + 1, BIRTHDAY_MONTH - 1, BIRTHDAY_DAY, 0, 0, 0, 0);
+    }
+    return { target: target, isToday: false };
+  }
+
+  function updateCountdown() {
+    const info = computeNextBirthday();
+
+    if (info.isToday) {
+      cdDays.textContent = "🎉";
+      cdHours.textContent = "🎂";
+      cdMinutes.textContent = "💓";
+      cdSeconds.textContent = "✨";
+      cdCaption.textContent = "today is the day — happy birthday, my love.";
+      return;
+    }
+
+    const diff = info.target.getTime() - Date.now();
+    if (diff <= 0) {
+      cdDays.textContent = "00";
+      cdHours.textContent = "00";
+      cdMinutes.textContent = "00";
+      cdSeconds.textContent = "00";
+      return;
+    }
+
+    const totalSeconds = Math.floor(diff / 1000);
+    const days    = Math.floor(totalSeconds / 86400);
+    const hours   = Math.floor((totalSeconds % 86400) / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const seconds = totalSeconds % 60;
+
+    cdDays.textContent    = pad(days);
+    cdHours.textContent   = pad(hours);
+    cdMinutes.textContent = pad(minutes);
+    cdSeconds.textContent = pad(seconds);
+    cdCaption.textContent = "every second brings me closer to celebrating you.";
+  }
+
+  updateCountdown();
+  setInterval(updateCountdown, 1000);
+
+  /* ----------------------------------------------------------------------
+     7. ENVELOPE LETTER
+     ---------------------------------------------------------------------- */
+  const envelope     = document.getElementById("envelope");
+  const letterPanel  = document.getElementById("letterPanel");
+
+  function toggleEnvelope() {
+    const isOpen = envelope.classList.toggle("open");
+    envelope.setAttribute("aria-expanded", isOpen ? "true" : "false");
+    letterPanel.classList.toggle("revealed", isOpen);
+    letterPanel.setAttribute("aria-hidden", isOpen ? "false" : "true");
+
+    if (isOpen) {
+      smallHeartBurst(0.5, 0.5, 14);
+    }
+  }
+
+  envelope.addEventListener("click", function (event) {
+    event.stopPropagation();
+    toggleEnvelope();
+  });
+  envelope.addEventListener("keydown", function (event) {
+    if (event.key === "Enter" || event.key === " " || event.key === "Spacebar") {
+      event.preventDefault();
+      event.stopPropagation();
+      toggleEnvelope();
+    }
+  });
+
+  /* ----------------------------------------------------------------------
+     8. REASONS CAROUSEL
+     ---------------------------------------------------------------------- */
+  const reasonViewport = document.getElementById("reasonViewport");
+  const reasonDots     = document.getElementById("reasonDots");
+  const reasonPrev     = document.getElementById("reasonPrev");
+  const reasonNext     = document.getElementById("reasonNext");
+
+  let reasonIndex = 0;
+
+  // Build reason cards
+  REASONS.forEach(function (reason, index) {
+    const card = document.createElement("article");
+    card.className = "reason-card" + (index === 0 ? " is-active" : "");
+    card.setAttribute("aria-hidden", index === 0 ? "false" : "true");
+    card.innerHTML =
+      '<span class="reason-index">Reason ' + (index + 1) + " of " + REASONS.length + "</span>" +
+      '<h3 class="reason-title">' + reason.title + "</h3>" +
+      '<p class="reason-body">' + reason.body + "</p>";
+    reasonViewport.appendChild(card);
+
+    const dot = document.createElement("button");
+    dot.className = "carousel-dot" + (index === 0 ? " is-active" : "");
+    dot.type = "button";
+    dot.setAttribute("role", "tab");
+    dot.setAttribute("aria-label", "Reason " + (index + 1));
+    dot.addEventListener("click", function (event) {
+      event.stopPropagation();
+      setReason(index);
+    });
+    reasonDots.appendChild(dot);
+  });
+
+  const reasonCards = Array.from(reasonViewport.children);
+  const reasonDotEls = Array.from(reasonDots.children);
+
+  function setReason(index) {
+    const total = REASONS.length;
+    reasonIndex = ((index % total) + total) % total;
+
+    reasonCards.forEach(function (card, i) {
+      const active = i === reasonIndex;
+      card.classList.toggle("is-active", active);
+      card.setAttribute("aria-hidden", active ? "false" : "true");
+    });
+    reasonDotEls.forEach(function (dot, i) {
+      dot.classList.toggle("is-active", i === reasonIndex);
+      dot.setAttribute("aria-selected", i === reasonIndex ? "true" : "false");
+    });
+  }
+
+  reasonPrev.addEventListener("click", function (event) {
+    event.stopPropagation();
+    setReason(reasonIndex - 1);
+  });
+  reasonNext.addEventListener("click", function (event) {
+    event.stopPropagation();
+    setReason(reasonIndex + 1);
+  });
+  setReason(0);
+
+  /* ----------------------------------------------------------------------
+     9. CAKE / CANDLE / WISH
+     ---------------------------------------------------------------------- */
+  const cake       = document.getElementById("cake");
+  const cakeHint   = document.getElementById("cakeHint");
+  const wishReveal = document.getElementById("wishReveal");
+  let cakeLit = false;
+
+  function handleCakeTap() {
+    if (!cakeLit) {
+      // Light the candle
+      cakeLit = true;
+      cake.classList.add("lit");
+      cake.setAttribute("aria-pressed", "true");
+      cake.setAttribute("aria-label", "Tap to blow out the candle and make a wish");
+      cakeHint.textContent = "now tap again to blow it out and make a wish";
+    } else {
+      // Blow out the candle and send the wish
+      cakeLit = false;
+      cake.classList.remove("lit");
+      cake.setAttribute("aria-pressed", "false");
+      cake.setAttribute("aria-label", "Tap to light the candle");
+      cakeHint.textContent = "your wish has been sent 💫";
+      wishReveal.classList.add("shown");
+      smallHeartBurst(0.5, 0.45, 26);
+    }
+  }
+
+  cake.addEventListener("click", function (event) {
+    event.stopPropagation();
+    handleCakeTap();
+  });
+  cake.addEventListener("keydown", function (event) {
+    if (event.key === "Enter" || event.key === " " || event.key === "Spacebar") {
+      event.preventDefault();
+      event.stopPropagation();
+      handleCakeTap();
+    }
+  });
+
+  /* ----------------------------------------------------------------------
+     10. FINALE — CONFETTI + HEARTS + CLOSING LINE
+     ---------------------------------------------------------------------- */
+  const sendLoveButton = document.getElementById("sendLoveButton");
+  const closingLine    = document.getElementById("closingLine");
+
+  sendLoveButton.addEventListener("click", function (event) {
+    event.stopPropagation();
+    closingLine.classList.add("shown");
+
+    // Confetti burst across the top
+    confettiBurst();
+    // Floating hearts rising from the bottom
+    heartShower();
+
+    // little button feedback
+    sendLoveButton.animate(
+      [{ transform: "scale(1)" }, { transform: "scale(0.96)" }, { transform: "scale(1)" }],
+      { duration: 320, easing: "ease-out" }
+    );
+  });
+
+  /* ----------------------------------------------------------------------
+     11. AMBIENT LAYER (hearts + sparkles)
+     ---------------------------------------------------------------------- */
+  function buildAmbient() {
+    if (reduceMotion) return;
+
+    const heartCount = window.innerWidth < 560 ? 12 : 20;
+    for (let i = 0; i < heartCount; i++) {
+      const heart = document.createElement("span");
+      heart.className = "ambient-heart" + (Math.random() > 0.66 ? " gold" : "");
+      heart.textContent = Math.random() > 0.5 ? "💓" : "♡";
+      heart.style.left = (Math.random() * 100) + "%";
+      heart.style.fontSize = (10 + Math.random() * 16) + "px";
+      heart.style.animationDuration = (11 + Math.random() * 12) + "s";
+      heart.style.animationDelay = (Math.random() * -18) + "s";
+      heart.style.setProperty("--drift", (Math.random() * 80 - 40) + "px");
+      heart.style.setProperty("--spin", (Math.random() * 80 - 40) + "deg");
+      ambient.appendChild(heart);
+    }
+
+    const sparkleCount = window.innerWidth < 560 ? 14 : 26;
+    for (let i = 0; i < sparkleCount; i++) {
+      const sparkle = document.createElement("span");
+      sparkle.className = "sparkle";
+      sparkle.style.left = (Math.random() * 100) + "%";
+      sparkle.style.top  = (Math.random() * 100) + "%";
+      sparkle.style.animationDuration = (2.4 + Math.random() * 3.2) + "s";
+      sparkle.style.animationDelay = (Math.random() * -5) + "s";
+      ambient.appendChild(sparkle);
+    }
+  }
+  buildAmbient();
+
+  /* ----------------------------------------------------------------------
+     12. PARTICLE SYSTEM (canvas) — bursts, confetti, hearts
+     ---------------------------------------------------------------------- */
+  function resizeCanvas() {
+    const dpr = window.devicePixelRatio || 1;
+    canvas.width = window.innerWidth * dpr;
+    canvas.height = window.innerHeight * dpr;
+    canvas.style.width = window.innerWidth + "px";
+    canvas.style.height = window.innerHeight + "px";
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+  resizeCanvas();
+  window.addEventListener("resize", resizeCanvas);
+
+  const particles = [];
+  let rafHandle = null;
+  let lastTime = 0;
+
+  const PALETTE = ["#D8A7B1", "#C98B9B", "#E3C97A", "#C9A227", "#5A2A3A", "#EBD3D8"];
+
+  function spawnParticle(options) {
+    const p = {
+      x: options.x,
+      y: options.y,
+      vx: options.vx,
+      vy: options.vy,
+      size: options.size,
+      color: options.color,
+      life: options.life,
+      maxLife: options.life,
+      gravity: options.gravity || 0.03,
+      drag: options.drag || 0.992,
+      shape: options.shape || "heart",
+      rotation: Math.random() * Math.PI * 2,
+      spin: (Math.random() - 0.5) * 0.22
+    };
+    particles.push(p);
+  }
+
+  function drawHeart(x, y, size, color, alpha, rotation) {
+    ctx.save();
+    ctx.globalAlpha = alpha;
+    ctx.translate(x, y);
+    ctx.rotate(rotation);
+    ctx.scale(size / 16, size / 16);
+    ctx.fillStyle = color;
+    ctx.beginPath();
+    ctx.moveTo(0, 3);
+    ctx.bezierCurveTo(0, 0, -5, -2, -8, 2);
+    ctx.bezierCurveTo(-11, 6, -6, 11, 0, 15);
+    ctx.bezierCurveTo(6, 11, 11, 6, 8, 2);
+    ctx.bezierCurveTo(5, -2, 0, 0, 0, 3);
+    ctx.closePath();
+    ctx.fill();
+    ctx.restore();
+  }
+
+  function drawSpark(x, y, size, color, alpha, rotation) {
+    ctx.save();
+    ctx.globalAlpha = alpha;
+    ctx.translate(x, y);
+    ctx.rotate(rotation);
+    ctx.fillStyle = color;
+    ctx.beginPath();
+    for (let i = 0; i < 4; i++) {
+      const angle = (Math.PI / 2) * i;
+      const outerX = Math.cos(angle) * size;
+      const outerY = Math.sin(angle) * size;
+      ctx.moveTo(0, 0);
+      ctx.lineTo(outerX, outerY);
+    }
+    ctx.lineWidth = Math.max(1, size * 0.5);
+    ctx.strokeStyle = color;
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.arc(0, 0, size * 0.42, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+  }
+
+  function drawConfetti(x, y, size, color, alpha, rotation) {
+    ctx.save();
+    ctx.globalAlpha = alpha;
+    ctx.translate(x, y);
+    ctx.rotate(rotation);
+    ctx.fillStyle = color;
+    ctx.fillRect(-size / 2, -size / 4, size, size / 2);
+    ctx.restore();
+  }
+
+  function tick(time) {
+    const delta = lastTime ? (time - lastTime) / 16.67 : 1;
+    lastTime = time;
+
+    ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+
+    for (let i = particles.length - 1; i >= 0; i--) {
+      const p = particles[i];
+      p.vx *= p.drag;
+      p.vy = p.vy * p.drag + p.g
